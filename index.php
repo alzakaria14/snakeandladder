@@ -623,7 +623,7 @@
             border: 1px solid rgba(205, 127, 50, 0.2);
         }
 
-        /* Interim winner toast (not all done yet) */
+        /* Interim winner toast */
         #winToast {
             position: fixed;
             bottom: 100px;
@@ -664,13 +664,13 @@
     <div id="menu">
         <h1>🐍 SNAKE & LADDER 🪜</h1>
         <div class="menu-section">
-            <h3>Nama Kamu</h3>
-            <input type="text" id="playerName" placeholder="Masukkan nama" maxlength="20" value="Player">
+            <h3>Your Name</h3>
+            <input type="text" id="playerName" placeholder="Enter your name" maxlength="20" value="Player">
         </div>
         <div class="menu-section">
             <h3>Local Play</h3>
             <div class="row">
-                <label style="font-size:13px;color:rgba(255,255,255,0.6);">Jumlah pemain</label>
+                <label style="font-size:13px;color:rgba(255,255,255,0.6);">Number of players</label>
                 <select id="localPlayerCount" style="max-width:90px;">
                     <option value="2">2</option>
                     <option value="3">3</option>
@@ -682,13 +682,13 @@
                     <option value="9">9</option>
                     <option value="10">10</option>
                 </select>
-                <button class="btn btn-primary" onclick="startLocalGame()">▶ Mulai</button>
+                <button class="btn btn-primary" onclick="startLocalGame()">▶ Start</button>
             </div>
         </div>
         <div class="menu-section">
             <h3>Online Multiplayer</h3>
             <div class="row">
-                <label style="font-size:13px;color:rgba(255,255,255,0.6);">Slot</label>
+                <label style="font-size:13px;color:rgba(255,255,255,0.6);">Slots</label>
                 <select id="onlineMaxPlayers" style="max-width:90px;">
                     <option value="2">2</option>
                     <option value="3">3</option>
@@ -700,11 +700,11 @@
                     <option value="9">9</option>
                     <option value="10">10</option>
                 </select>
-                <button class="btn btn-green" onclick="createRoom()">+ Buat Room</button>
+                <button class="btn btn-green" onclick="createRoom()">+ Create Room</button>
             </div>
             <div class="row">
-                <input type="text" id="joinID" placeholder="Kode Room (mis: 1234)">
-                <button class="btn btn-blue" onclick="joinRoom()">Gabung</button>
+                <input type="text" id="joinID" placeholder="Room Code (e.g. 1234)">
+                <button class="btn btn-blue" onclick="joinRoom()">Join</button>
             </div>
         </div>
         <p id="menuStatus"></p>
@@ -712,25 +712,25 @@
 
     <!-- LOBBY -->
     <div id="lobby">
-        <h2>⏳ Menunggu Pemain...</h2>
+        <h2>⏳ Waiting for Players...</h2>
         <div id="playerList"></div>
-        <p id="lobbyStatus">Bagikan kode room ke teman kamu</p>
+        <p id="lobbyStatus">Share the room code with your friends</p>
         <div class="row" style="gap:10px;">
-            <button class="btn btn-ghost" onclick="copyRoomLink()">🔗 Salin Link</button>
-            <button class="btn btn-primary" id="startNowBtn" onclick="forceStart()" style="display:none;">▶ Mulai
-                Sekarang</button>
+            <button class="btn btn-ghost" onclick="copyRoomLink()">🔗 Copy Link</button>
+            <button class="btn btn-primary" id="startNowBtn" onclick="forceStart()" style="display:none;">▶ Start
+                Now</button>
         </div>
-        <button class="btn btn-red" onclick="goToMenu()" style="margin-top:4px;">✕ Keluar</button>
+        <button class="btn btn-red" onclick="goToMenu()" style="margin-top:4px;">✕ Leave</button>
     </div>
 
-    <!-- RESULTS PODIUM (semua pemain selesai) -->
+    <!-- RESULTS PODIUM -->
     <div id="resultsBanner">
         <div class="results-box">
             <div style="font-size:2.5rem;">🏆</div>
-            <h2>Hasil Akhir!</h2>
+            <h2>Final Results!</h2>
             <div class="podium-list" id="podiumList"></div>
             <div style="display:flex;gap:10px;justify-content:center;">
-                <button class="btn btn-primary" onclick="closeResults()">Main Lagi</button>
+                <button class="btn btn-primary" onclick="closeResults()">Play Again</button>
                 <button class="btn btn-ghost" onclick="goToMenu()">Menu</button>
             </div>
         </div>
@@ -762,7 +762,7 @@
         <div id="controls">
             <div id="diceDisplay">🎲</div>
             <div id="bonusIndicator"></div>
-            <button id="rollBtn" onclick="handleRollClick()">🎲 LEMPAR DADU</button>
+            <button id="rollBtn" onclick="handleRollClick()">🎲 ROLL DICE</button>
             <p id="turnInfo">Loading...</p>
             <p id="statusMsg"></p>
         </div>
@@ -788,12 +788,12 @@
         let snakes = {},
             ladders = {};
         let state = {
-            players: [], // [{ index, name, position, score, finishRank, isFinished }]
+            players: [],
             turn: 0,
             seed: 0,
             lastRoll: 0,
             lastPlayer: 0,
-            bonusTurn: false, // apakah giliran saat ini adalah bonus (dapat angka 6)
+            bonusTurn: false,
             finishedCount: 0,
             status: 'waiting',
             maxPlayers: 2,
@@ -812,8 +812,7 @@
             player: -1
         };
 
-        // Untuk lokal: simpan apakah roll sebelumnya adalah 6 (per pemain)
-        let lastRollWasSix = {}; // { playerIndex: bool }
+        let lastRollWasSix = {};
 
         // ============================================================
         // Board Grid
@@ -936,7 +935,6 @@
                     wrap.appendChild(circle);
                     layer.appendChild(wrap);
                 }
-                // Update finished style
                 const circle = document.querySelector(`#token${p.index} .token-circle`);
                 if (circle) circle.classList.toggle("is-finished", p.isFinished);
             });
@@ -996,7 +994,6 @@
         function renderScoreboard() {
             const sb = document.getElementById("scoreboard");
             sb.innerHTML = "";
-            // Sort: yang sudah finish tampil dulu urut rank, lalu yang belum
             const sorted = [...state.players].sort((a, b) => {
                 if (a.isFinished && b.isFinished) return a.finishRank - b.finishRank;
                 if (a.isFinished) return -1;
@@ -1028,12 +1025,11 @@
         async function handleRollClick() {
             if (moving) return;
             if (isOnline && state.turn !== myPlayerIndex) {
-                setStatus("⛔ Bukan giliran kamu!");
+                setStatus("⛔ It's not your turn!");
                 return;
             }
             const currentP = state.players.find(p => p.index === state.turn);
             if (!currentP || currentP.isFinished) {
-                // Seharusnya tidak terjadi, tapi safeguard
                 advanceTurn();
                 renderUI();
                 return;
@@ -1045,7 +1041,7 @@
             setTimeout(() => document.getElementById("diceDisplay").classList.remove("rolling"), 400);
 
             if (isOnline) {
-                setStatus("Mengirim...");
+                setStatus("Sending...");
                 const res = await apiCall('roll', {
                     roomCode: roomID,
                     playerIndex: myPlayerIndex,
@@ -1056,30 +1052,24 @@
                     return;
                 }
                 setStatus("");
-                // bonusTurn dari server: kalau true → giliran tetap pada kita setelah move
                 const willGetBonus = res.room.bonusTurn && res.room.lastPlayer === myPlayerIndex;
                 await executeMove(dice, myPlayerIndex, true, willGetBonus);
-                // Setelah move, sync turn dari server
                 state.turn = res.room.turn;
                 state.bonusTurn = res.room.bonusTurn;
             } else {
                 const curTurn = state.turn;
                 const prevWasSix = lastRollWasSix[curTurn] || false;
 
-                // Bonus: dapat 6 pertama → beri giliran ekstra. Dapat 6 lagi saat bonus → tidak bonus lagi.
                 const grantBonus = (dice === 6 && !prevWasSix);
-                lastRollWasSix[curTurn] = (dice === 6 && !prevWasSix); // simpan untuk cek berikutnya
-                // Jika dapat 6 saat bonus → hapus status bonus
+                lastRollWasSix[curTurn] = (dice === 6 && !prevWasSix);
                 if (dice === 6 && prevWasSix) lastRollWasSix[curTurn] = false;
-
                 if (dice !== 6) lastRollWasSix[curTurn] = false;
 
                 await executeMove(dice, curTurn, false, grantBonus);
                 if (!moving) {
                     if (grantBonus) {
-                        // Giliran tetap — update bonusTurn state
                         state.bonusTurn = true;
-                        setStatus(`🎲 ${state.players.find(p => p.index === curTurn)?.name} dapat angka 6 — ROLL LAGI!`);
+                        setStatus(`🎲 ${state.players.find(p => p.index === curTurn)?.name} rolled a 6 — ROLL AGAIN!`);
                     } else {
                         state.bonusTurn = false;
                         advanceTurn();
@@ -1113,14 +1103,14 @@
                     player.position = snakes[player.position];
                     moveTokenSmooth(pIdx, player.position);
                     eventType = 'snake';
-                    setStatus("🐍 Kena ular! Turun...");
+                    setStatus("🐍 Hit a snake! Sliding down...");
                     await sleep(600);
                 } else if (ladders[player.position]) {
                     await sleep(280);
                     player.position = ladders[player.position];
                     moveTokenSmooth(pIdx, player.position);
                     eventType = 'ladder';
-                    setStatus("🪜 Naik tangga!");
+                    setStatus("🪜 Climbing a ladder!");
                     await sleep(600);
                 }
             }
@@ -1138,22 +1128,18 @@
                 });
             }
 
-            // Render lengkap setelah move selesai
             renderUI();
 
-            // Cek finish
             if (player.position === 100 && !player.isFinished) {
                 player.isFinished = true;
                 state.finishedCount++;
                 player.finishRank = state.finishedCount;
 
-                // Poin = (maxPlayers - rank + 1), minimal 1
                 player.score += Math.max(1, state.maxPlayers - player.finishRank + 1);
 
                 const allDone = state.players.every(p => p.isFinished);
 
                 if (allDone) {
-                    // Semua selesai → tampilkan hasil akhir
                     await sleep(400);
                     showResults();
                     if (!isOnline) {
@@ -1161,9 +1147,7 @@
                         resetRound();
                     }
                 } else {
-                    // Masih ada yang bermain → tampilkan toast sementara
                     showWinToast(player.name, player.finishRank);
-                    // Pemain ini tetap lanjut ke step bonus/turn-advance di luar
                 }
             }
 
@@ -1196,18 +1180,17 @@
             const canRoll = myTurn && !moving && currentP && !currentP.isFinished;
 
             let turnText = currentP ? `${currentP.name}'s Turn` : "";
-            if (isOnline) turnText += myTurn ? " — GILIRAN KAMU!" : " — menunggu...";
+            if (isOnline) turnText += myTurn ? " — YOUR TURN!" : " — waiting...";
 
             document.getElementById("turnInfo").textContent = turnText;
             document.getElementById("rollBtn").disabled = !canRoll;
 
-            // Bonus indicator
             const bonusEl = document.getElementById("bonusIndicator");
             if (state.bonusTurn && (myTurn || !isOnline)) {
-                bonusEl.textContent = "🎲 BONUS ROLL — Dapat angka 6!";
+                bonusEl.textContent = "🎲 BONUS ROLL — Rolled a 6!";
             } else if (state.bonusTurn) {
                 const bonusPlayer = state.players.find(p => p.index === state.turn);
-                bonusEl.textContent = bonusPlayer ? `${bonusPlayer.name} dapat bonus roll!` : "";
+                bonusEl.textContent = bonusPlayer ? `${bonusPlayer.name} has a bonus roll!` : "";
             } else {
                 bonusEl.textContent = "";
             }
@@ -1222,13 +1205,13 @@
         // ============================================================
         function showWinToast(name, rank) {
             const toast = document.getElementById("winToast");
-            toast.textContent = `${RANK_MEDALS[rank - 1]} ${name} finish posisi #${rank}! Game terus...`;
+            toast.textContent = `${RANK_MEDALS[rank - 1]} ${name} finished in position #${rank}! Game continues...`;
             toast.style.opacity = "1";
             setTimeout(() => toast.style.opacity = "0", 3000);
         }
 
         // ============================================================
-        // Results Podium (semua selesai)
+        // Results Podium
         // ============================================================
         function showResults() {
             const sorted = [...state.players].sort((a, b) => a.finishRank - b.finishRank);
@@ -1240,7 +1223,7 @@
                 row.innerHTML = `
             <div class="podium-medal">${RANK_MEDALS[p.finishRank - 1]}</div>
             <div class="podium-name" style="color:${PLAYER_COLORS[p.index]}">${escHtml(p.name)}</div>
-            <div class="podium-pts">★${p.score} poin</div>
+            <div class="podium-pts">★${p.score} pts</div>
         `;
                 list.appendChild(row);
             });
@@ -1353,7 +1336,7 @@
         async function createRoom() {
             const name = document.getElementById("playerName").value.trim() || "Player 1";
             const max = parseInt(document.getElementById("onlineMaxPlayers").value);
-            document.getElementById("menuStatus").textContent = "Membuat room...";
+            document.getElementById("menuStatus").textContent = "Creating room...";
             const res = await apiCall('create', {
                 playerName: name,
                 maxPlayers: max
@@ -1377,10 +1360,10 @@
             const code = document.getElementById("joinID").value.trim();
             const name = document.getElementById("playerName").value.trim() || "Player";
             if (!code) {
-                alert("Masukkan kode room!");
+                alert("Please enter a room code!");
                 return;
             }
-            document.getElementById("menuStatus").textContent = "Bergabung...";
+            document.getElementById("menuStatus").textContent = "Joining...";
             const res = await apiCall('join', {
                 roomCode: code,
                 playerName: name
@@ -1470,7 +1453,6 @@
                 const willBonus = room.bonusTurn && room.lastPlayer === room.turn;
                 await executeMove(room.lastRoll, room.lastPlayer, false, willBonus);
 
-                // Sync posisi dari server setelah animasi
                 room.players.forEach(sp => {
                     const lp = state.players.find(p => p.index === sp.index);
                     if (lp) {
@@ -1566,13 +1548,13 @@
                <span>${escHtml(p.name)}</span>
                ${i === 0 ? '<span style="margin-left:auto;font-size:11px;opacity:0.5;">HOST</span>' : ''}` :
                     `<div class="dot" style="background:rgba(255,255,255,0.1)"></div>
-               <span class="slot-empty">Slot ${i + 1} — menunggu...</span>`;
+               <span class="slot-empty">Slot ${i + 1} — waiting...</span>`;
                 list.appendChild(row);
             }
             const filled = state.players.length;
             document.getElementById("lobbyStatus").textContent =
-                `${filled} / ${state.maxPlayers} pemain bergabung` +
-                (myPlayerIndex === 0 && filled >= 2 ? " — kamu bisa mulai sekarang!" : "");
+                `${filled} / ${state.maxPlayers} players joined` +
+                (myPlayerIndex === 0 && filled >= 2 ? " — you can start now!" : "");
             document.getElementById("startNowBtn").style.display =
                 (myPlayerIndex === 0 && filled >= 2) ? "" : "none";
         }
@@ -1584,7 +1566,7 @@
             document.getElementById("resultsBanner").style.display = "none";
             if (isOnline) {
                 if (myPlayerIndex !== 0) {
-                    alert("Hanya host yang bisa restart.");
+                    alert("Only the host can restart the game.");
                     return;
                 }
                 const res = await apiCall('restart', {
@@ -1610,7 +1592,7 @@
         function copyRoomLink() {
             if (!roomID) return;
             const url = window.location.origin + window.location.pathname + "?room=" + roomID;
-            navigator.clipboard.writeText(url).then(() => alert("Link disalin!\n" + url));
+            navigator.clipboard.writeText(url).then(() => alert("Link copied!\n" + url));
         }
 
         function sleep(ms) {
@@ -1625,7 +1607,7 @@
             const room = params.get('room');
             if (room) {
                 document.getElementById("joinID").value = room;
-                document.getElementById("menuStatus").textContent = "Klik Gabung untuk masuk ke room " + room;
+                document.getElementById("menuStatus").textContent = "Click Join to enter room " + room;
             }
             generateBoard(42);
         };
