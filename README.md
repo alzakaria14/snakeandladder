@@ -136,7 +136,8 @@ The frontend communicates with `api.php` using the following actions:
 
 ## 📱 Screenshots
 
-> *(Add screenshots of the menu, board, and results screen here)*
+<img width="1914" height="935" alt="Screenshot 2026-02-17 171139" src="https://github.com/user-attachments/assets/51c87c3a-0591-4836-baf7-de0c71882147" />
+
 
 ---
 
